@@ -1,0 +1,4 @@
+<17/11/2021>
+* Sujet : apprentissage / reco tumeurs avec plateforme web
+* TODO : détailler les objectifs intermédiaires du sujet et donner un exemple
+  d'attribution des taĉhes entre vous
