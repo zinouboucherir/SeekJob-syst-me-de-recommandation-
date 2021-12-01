@@ -2,3 +2,13 @@
 * Sujet : apprentissage / reco tumeurs avec plateforme web
 * TODO : détailler les objectifs intermédiaires du sujet et donner un exemple
   d'attribution des taĉhes entre vous
+
+<01/12/2021>
+* Sujet : site web de recommendation d'emploi pour les utilisateurs (extraction de données à partir de CV)
+ traitement TAL prenant en entrée des CV
+* TODO:
+- documentation d'extration d'information à partir d'un document
+- documentation sur le data mining
+- commencer à implémenter le programme avec un ou deux CV
+- recherche de dataset de CV
+
