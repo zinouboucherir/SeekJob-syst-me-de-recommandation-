@@ -12,3 +12,11 @@
 - commencer à implémenter le programme avec un ou deux CV
 - recherche de dataset de CV
 
+<08/02/2022>
+* FAIT :
+  - construit un dataset de cv avec du webscraping (selenium)
+  - code pour l'apprentissage : NLTK -> détection des différents éléments du cv
+* TODO :
+  - récupérer un accès à Odette
+  - travailler sur la similarité entre paragraphes
+
