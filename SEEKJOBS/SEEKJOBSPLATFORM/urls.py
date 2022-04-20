@@ -10,6 +10,6 @@ urlpatterns = [
     path('uploadcv', views.uploadcv, name='uploadcv'),
     path('job/<int:job_id>', views.job, name='job'),
     path('resume/<str:username>', views.resume, name='resume'),
-  
+    path('logout', views.logout_view, name="logout"),
 ]
 
