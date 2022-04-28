@@ -12,8 +12,8 @@ from django.shortcuts import render, redirect
 from .forms import RegistrationForm,LoginForm,ResumeUpload, SearchtitledocumentForm, \
     SearchregionForm, JobTypeFilterForm,CompanyInformation
 # Create your views here.
-from .models import Jobs, seeker_resume, recruiter,company
-from .models import user_account
+from .models import Jobs, seeker_resume, recruiter,company,user_account
+
 
 
 
