@@ -32,3 +32,14 @@ class JobTypeFilterForm(forms.Form):
     internship = forms.CharField()
     partTime = forms.CharField()
     temporary = forms.CharField()
+
+class CompanyInformation(forms.Form):
+    name = forms.CharField(max_length=100)
+    website = forms.CharField(max_length=100)
+    tagline = forms.CharField(max_length=250)
+    # logo = forms.ImageField()
+    description = forms.CharField()
+    linkedin = forms.CharField(max_length=200)
+    email = forms.CharField(max_length=100)
+    phone = forms.CharField(max_length=15)
+    location = forms.CharField(max_length=150)

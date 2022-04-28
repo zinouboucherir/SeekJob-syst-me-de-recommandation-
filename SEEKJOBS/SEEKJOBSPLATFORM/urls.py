@@ -11,5 +11,8 @@ urlpatterns = [
     path('job/<int:job_id>', views.job, name='job'),
     path('resume/<str:username>', views.resume, name='resume'),
     path('logout', views.logout_view, name="logout"),
+    path('company/<str:name>', views.companyprofile, name="company"),
+    path('companies', views.companies, name="companies"),
+    path('complete-company', views.CompanyInfo, name="complete-company")
 ]
 

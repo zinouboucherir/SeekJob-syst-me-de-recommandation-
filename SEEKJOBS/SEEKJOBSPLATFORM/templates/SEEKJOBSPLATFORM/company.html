@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 {% load static %}
 <html lang="en">
 <head>
@@ -60,7 +60,7 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'SEEKJOBSPLATFORM:jobs' %}"> jobs </a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'SEEKJOBSPLATFORM:companies' %}"> companies </a></li>
                     {% if candidate %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'SEEKJOBSPLATFORM:recommendations' %}">
+                        <li class="nav-item"><a class="nav-link" href="#">
                             recommendations </a>
                         </li>
                     {% else %}
@@ -87,73 +87,98 @@
                 </ul>
             </div>
         </div>
-
-
     </nav>
     <!-- Navbar End -->
 </header>
 <section class="container">
-    <div class="row" style="border:1px solid #dadada; padding: 10px;">
+    <form action='complete-company' method="post" enctype="multipart/form-data" class="form   justify-content-center">
+        {% csrf_token %}
+        <!-- Default form group -->
 
-        <div class="col-3 ">
-            <img style=" height: 160px;  width: 160px;  border-radius: 5px; padding: 5px;border: 2px solid #dadada"
-                 src="{% static '/img/test-logo.png' %}">
+        <!-- Default input -->
+        <div class="form-group w-100">
+            <h2 class="text-light">Company Details</h2>
+            <label for="name">Company name </label>
+            <input type="text" class="form-control" id="formGroupExampleInput" name="name" placeholder="Company name">
         </div>
-        <div class="col-6">
-            <div class="row d-md-block justify-content-center" style="margin-left: -10%">
-                <br>
-                <h3 for="name " class="text-dark ">{{ job.job_title }} </h3>
-                <a class="text-main-color text-left" href="" style="margin-left: 0%"><i class="fas fa-building ">
-                    {{ job.job_company.company_name }}</i></a>
-                <br>
+        <div class="row">
+            <!-- Grid column -->
+            <div class="col">
+                <!-- Default input -->
+                <label for="name " class="text-dark">Website</label>
+                <input type="text" class="form-control" name="website" placeholder="website(optional)">
+            </div>
+            <!-- Grid column -->
 
-                <span class="text-main-color text-muted"><i
-                        class="fas fa-map-marker-alt "> {{ job.job_location }}</i></span>
+            <!-- Grid column -->
+            <div class="col">
+                <!-- Default input -->
+                <label for="name " class="text-dark">Tagline</label>
+                <input type="text" class="form-control" name="tagline"
+                       placeholder="Briefly describe your Company (optional)">
+            </div>
+            <!-- Grid column -->
+            <div class="col">
+                <!-- Default input -->
+                <label for="name " class="text-dark">LinkedIn</label>
+                <input type="text" class="form-control" name="linkedin" placeholder="LinkedIn(optional)">
             </div>
         </div>
-        <div class="col-3">
-            <br>
-            <br>
-            {% if type %}
-                <button type="button" onclick="window.location.href='apply?id={{ job.id }}'"
-                        class="btn btn-large btn-danger w-75"> Apply
-                </button>
-            {% endif %}
+        <div class="form-group w-100 ">
+
+            <label for="name">Company Logo </label>
+            <input type="file" accept="image/*" class="form-control" id="formGroupExampleInput" name="logo"
+                   placeholder="Company Logo">
+            <small class="text-light">maximum size 10MB</small>
         </div>
-    </div>
-
-</section>
-<section class="container" style="padding-top: 10px;">
-    <div class="row" style="border:1px solid #dadada; padding: 10px;">
-        <div class="col">
-            <span class="text-dark info-text ">Job Experience</span><span class="text-black-50"
-                                                                          style="padding-left:3em"> {{ job.job_experience }}</span>
-            <br>
-            <span class="text-dark info-text ">Job Type:</span><span class="text-black-50"
-                                                                     style="padding-left:3em"> {{ job.type }}</span>
-            <br>
+        <div class="form-group w-100">
+            <label for="Description"> Description(optional)</label>
+            <textarea id="mytextarea" class="form-control" name="description"> </textarea>
         </div>
-        <div class="col">
-            <span class="text-dark info-text ">Publication Date:</span><span class="text-black-50"
-                                                                             style="padding-left:3em"> {{ job.whenpublished }}</span>
-            <br>
-            <span class="text-dark info-text ">Education Level:</span><span class="text-black-50"
-                                                                            style="padding-left:3em">{{ job.job_education }}</span>
+        <!-- Grid column -->
+        <div class="row">
+            <!-- Grid column -->
+            <div class="col">
+                <!-- Default input -->
+                <label for="name " class="text-dark">Email</label>
+                <input type="text" class="form-control" name="email" placeholder="Email(optional)">
+            </div>
+            <!-- Grid column -->
+
+            <!-- Grid column -->
+            <div class="col">
+                <!-- Default input -->
+                <label for="name " class="text-dark">Phone</label>
+                <input type="text" class="form-control" name="phone"
+                       placeholder="Phone(optional)">
+            </div>
+            <!-- Grid column -->
 
         </div>
-    </div>
-</section>
-<section class="container " style="padding-top: 10px;padding-bottom: 10px;">
+        <div class="row">
+            <!-- Grid column -->
+            <div class="col">
+                <!-- Default input -->
+                <label for="location" class="text-dark">Location</label>
+                <input type="text" class="form-control" name="location" placeholder="Location(optional)">
+            </div>
+            <!-- Grid column -->
 
-    <div class="col" style="border:1px solid #dadada; padding: 10px;">
-        <br>
-        {{ job.job_description |safe }}
+            <!-- Grid column -->
+            <div class="col">
+                <!-- Default input -->
+                <label for="name " class="text-dark">Since</label>
+                <input type="text" class="form-control" name="since" placeholder="established date/year(optional)">
+            </div>
+            <div class="col-md-12">
 
 
-    </div>
+                <button class="btn btn-common btn-rounded float-md-none  " type="submit">Submit</button>
+            </div>
+        </div>
 
-
-</section>
+    </form>
+    <!-- Default form group --></section>
 
 
 <!-- Footer Section Start -->
@@ -243,8 +268,11 @@
 <script src="{% static '/js/jquery-migrate-3.0.1.js' %}"></script>
 <script src="{% static '/js/popper.min.js' %}"></script>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+
 <script src="{% static '/js/jquery.easing.min.js' %}"></script>
 <script src="{% static '/js/wow.js' %}"></script>
+
 <script src="{% static '/js/nivo-lightbox.js' %}"></script>
 <script src="{% static 'js/mdb.min.js' %}"></script>
 <script src="{% static 'js/datepicker.js' %}"></script>
@@ -254,5 +282,3 @@
 <script src="{% static '/js/signin.js' %}"></script>
 </body>
 </html>
-
-

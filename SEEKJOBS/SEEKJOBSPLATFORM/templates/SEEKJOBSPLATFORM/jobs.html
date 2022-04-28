@@ -43,7 +43,7 @@
                 <ul class="navbar-nav mr-auto w-100 justify-content-end">
                     <li class="nav-item active"><a class="nav-link" href="{% url 'SEEKJOBSPLATFORM:homepage' %}"> Home </a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'SEEKJOBSPLATFORM:jobs' %}"> jobs </a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"> companies </a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'SEEKJOBSPLATFORM:companies' %}"> companies </a></li>
                     {% if candidate %}
                         <li class="nav-item"><a class="nav-link" href="#">
                             recommendations </a>
