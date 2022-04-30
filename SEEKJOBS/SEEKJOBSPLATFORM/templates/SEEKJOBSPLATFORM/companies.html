@@ -9,10 +9,6 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" type="text/css" href="{% static '/css/bootstrap.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static '/css/bootstrap.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static '/css/mdb.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static '/css/mdb.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static '/css/datepicker.css' %}">
     <!-- Icon -->
     <link rel="stylesheet" type="text/css" href="{% static '/fonts/line-icons.css' %}">
     <!-- Slicknav -->
@@ -27,17 +23,6 @@
     <link rel="stylesheet" type="text/css" href="{% static '/css/responsive.css' %}">
     <link href="{% static '/css/fontawesome/css/all.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static '/css/fontawesome/css/fontawesome.css' %}" rel="stylesheet" type="text/css">
-    <script src="{% static 'js/tinymce/tinymce.min.js' %}"></script>
-    <script>
-        tinymce.init({
-            selector: '#mytextarea',
-            height: 300,
-            statusbar: false,
-            menubar: false,
-
-
-        });
-    </script>
 </head>
 <body>
 
@@ -60,7 +45,7 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'SEEKJOBSPLATFORM:jobs' %}"> jobs </a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'SEEKJOBSPLATFORM:companies' %}"> companies </a></li>
                     {% if candidate %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'SEEKJOBSPLATFORM:recommendations' %}">
+                        <li class="nav-item"><a class="nav-link" href="#">
                             recommendations </a>
                         </li>
                     {% else %}
@@ -91,75 +76,87 @@
 
     </nav>
     <!-- Navbar End -->
-</header>
-<section class="container">
-    <div class="row" style="border:1px solid #dadada; padding: 10px;">
 
-        <div class="col-3 ">
-            <img style=" height: 160px;  width: 160px;  border-radius: 5px; padding: 5px;border: 2px solid #dadada"
-                 src="{% static '/img/test-logo.png' %}">
+    
+
+    <!-- Main Carousel Section Start -->
+    <div id="main-slide" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner slide-h ">
+            <div class="carousel-item active  "><img class="d-md-block w-100 "
+                                                     src="{% static '/img/slider/slide1.jpg' %}">
+
+            </div>
+
+
         </div>
-        <div class="col-6">
-            <div class="row d-md-block justify-content-center" style="margin-left: -10%">
-                <br>
-                <h3 for="name " class="text-dark ">{{ job.job_title }} </h3>
-                <a class="text-main-color text-left" href="" style="margin-left: 0%"><i class="fas fa-building ">
-                    {{ job.job_company.company_name }}</i></a>
-                <br>
+    </div>
 
-                <span class="text-main-color text-muted"><i
-                        class="fas fa-map-marker-alt "> {{ job.job_location }}</i></span>
+    <!-- Main Carousel Section End -->
+
+</header>
+<!-- Header Area wrapper End -->
+
+<!-- start job posts and filters-->
+<section class="section-padding">
+    <div class="container job-list">
+        <div class="col-2"> </div>
+        <div class="list-group col-10 ">
+            <!-- latest jobs item inside for loop -->
+            {% for company in companies %}
+                <a href="company/{{ company.company_name }}">
+                    <div class="card list-group-item list-group-item-action">
+                        <div class="text-dark align-content-lg-start">
+                            <div class="job-post col ">
+                                <img src="{% static '/img/test-logo.png' %}">
+                                <div class="col-md-8">
+                                    <h5 class="card-title">{{ company.company_name }}</h5>
+                                    <span class="company"><i
+                                            class="fas fa-building"> {{ company.company_tagline }}</i>   </span>
+                                    <br>
+                                    <span><i class="fas fa-map-marker-alt"></i> {{ company.company_location }}</span>
+                                </div>
+                                <div class="col-3">
+                                    <div class="job-type">
+                                        <button type="button" class="btn btn-outline-success"> <i class="fa fa-external-link"> visit</i></button>
+                                    </div>
+                                    <span class="col">{{ job.whenpublished }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+
+            <div class="pagination justify-content-center">
+                <span class="step-links">
+                    {% if companies.has_previous %}
+                        <a href="?page=1">&laquo; first</a>
+                        <a href="?page={{ companies.previous_page_number }}">previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Page {{ companies.number }} of {{ companies.paginator.num_pages }}.
+                    </span>
+
+                    {% if jobs.has_next %}
+                        <a href="?page={{ companies.next_page_number }}">next</a>
+                        <a href="?page={{ companies.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span>
             </div>
         </div>
-        <div class="col-3">
-            <br>
-            <br>
-            {% if type %}
-                <button type="button" onclick="window.location.href='apply?id={{ job.id }}'"
-                        class="btn btn-large btn-danger w-75"> Apply
-                </button>
-            {% endif %}
-        </div>
-    </div>
-
-</section>
-<section class="container" style="padding-top: 10px;">
-    <div class="row" style="border:1px solid #dadada; padding: 10px;">
-        <div class="col">
-            <span class="text-dark info-text ">Job Experience</span><span class="text-black-50"
-                                                                          style="padding-left:3em"> {{ job.job_experience }}</span>
-            <br>
-            <span class="text-dark info-text ">Job Type:</span><span class="text-black-50"
-                                                                     style="padding-left:3em"> {{ job.type }}</span>
-            <br>
-        </div>
-        <div class="col">
-            <span class="text-dark info-text ">Publication Date:</span><span class="text-black-50"
-                                                                             style="padding-left:3em"> {{ job.whenpublished }}</span>
-            <br>
-            <span class="text-dark info-text ">Education Level:</span><span class="text-black-50"
-                                                                            style="padding-left:3em">{{ job.job_education }}</span>
-
-        </div>
     </div>
 </section>
-<section class="container " style="padding-top: 10px;padding-bottom: 10px;">
-
-    <div class="col" style="border:1px solid #dadada; padding: 10px;">
-        <br>
-        {{ job.job_description |safe }}
-
-
-    </div>
-
-
-</section>
-
 
 <!-- Footer Section Start -->
 <footer class="footer-area section-padding">
     <div class="container">
         <div class="row">
+            <div class="col-md-6 col-lg-3 col-sm-6 col-xs-12 wow fadeInUp" data-wow-delay="0.2s">
+                <h3><img src="{% static '/img/logo.png' %}" alt=""></h3>
+                <p> Aorem ipsum dolor sit amet elit sed lum tempor incididunt ut labore el dolore alg minim veniam quis
+                    nostrud ncididunt. </p>
+            </div>
             <div class="col-md-6 col-lg-3 col-sm-6 col-xs-12 wow fadeInUp" data-wow-delay="0.4s">
                 <h3>QUICK LINKS</h3>
                 <ul>
@@ -177,7 +174,7 @@
                         <figure class="overlay"><img class="img-fluid" src="{% static '/img/art/a1.jpg' %}" alt="">
                         </figure>
                         <div class="post-content">
-                            <h6 class="post-title"><a href="blog-single.html">Lorem ipsm dolor sumit.</a></h6>
+                            <h6 class="post-title"><a href="">Lorem ipsm dolor sumit.</a></h6>
                             <div class="meta"><span class="date">October 12, 2018</span></div>
                         </div>
                     </li>
@@ -185,7 +182,7 @@
                         <figure class="overlay"><img class="img-fluid" src="{% static '/img/art/a2.jpg' %}" alt="">
                         </figure>
                         <div class="post-content">
-                            <h6 class="post-title"><a href="blog-single.html">Lorem ipsm dolor sumit.</a></h6>
+                            <h6 class="post-title"><a href="">Lorem ipsm dolor sumit.</a></h6>
                             <div class="meta"><span class="date">October 12, 2018</span></div>
                         </div>
                     </li>
@@ -196,7 +193,6 @@
                 <div class="widget">
                     <div class="newsletter-wrapper">
                         <form method="post" id="subscribe-form" name="subscribe-form" class="validate">
-                            {% csrf_token %}
                             <div class="form-group is-empty">
                                 <input type="email" value="" name="Email" class="form-control" id="EMAIL"
                                        placeholder="Your email" required="">
@@ -228,7 +224,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="site-info">
-                    <p>© Designed and Developed by <a href="#" rel="nofollow">SEEKJOBS</a></p>
+                    <p>© Designed and Developed by <a href="#" rel="nofollow">PFE</a></p>
                 </div>
             </div>
         </div>
@@ -239,20 +235,16 @@
 <a href="#" class="back-to-top"> <i class="lni-chevron-up"></i> </a>
 
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="{% static '/js/jquery-3.3.1.min.js' %}"></script>
-<script src="{% static '/js/jquery-migrate-3.0.1.js' %}"></script>
+<script src="{% static '/js/jquery-min.js' %}"></script>
 <script src="{% static '/js/popper.min.js' %}"></script>
 <script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static '/js/jquery.nav.js' %}"></script>
 <script src="{% static '/js/jquery.easing.min.js' %}"></script>
 <script src="{% static '/js/wow.js' %}"></script>
+<script src="{% static '/js/jquery.slicknav.js' %}"></script>
 <script src="{% static '/js/nivo-lightbox.js' %}"></script>
-<script src="{% static 'js/mdb.min.js' %}"></script>
-<script src="{% static 'js/datepicker.js' %}"></script>
-
+<script src="{% static '/js/main.js' %}"></script>
 <script src="{% static '/js/form-validator.min.js' %}"></script>
 <script src="{% static '/js/contact-form-script.min.js' %}"></script>
-<script src="{% static '/js/signin.js' %}"></script>
 </body>
 </html>
-
-

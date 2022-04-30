@@ -10,10 +10,10 @@ from django.shortcuts import render, redirect
 
 
 from .forms import RegistrationForm,LoginForm,ResumeUpload, SearchtitledocumentForm, \
-    SearchregionForm, JobTypeFilterForm
+    SearchregionForm, JobTypeFilterForm,CompanyInformation
 # Create your views here.
-from .models import Jobs, seeker_resume, recruiter
-from .models import user_account
+from .models import Jobs, seeker_resume, recruiter,company,user_account
+
 
 
 
@@ -190,3 +190,53 @@ def resume(request, username):
 def logout_view(request):
     logout(request)
     return redirect('SEEKJOBSPLATFORM:homepage')
+
+
+def companyprofile(request, name):
+    candidate = True
+    if recruiter.objects.filter(user_id=request.user.id).exists():
+        candidate = False
+    cmp = company.objects.get(company_name=name)
+    jobs = Jobs.objects.filter(job_company=cmp).order_by("-id")[:4]
+    return render(request=request, template_name='SEEKJOBSPLATFORM/companyProfile.html',
+                  context={'company': cmp, 'jobs': jobs, 'candidate': candidate})
+
+
+def companies(request):
+    candidate = True
+    if recruiter.objects.filter(user_id=request.user.id).exists():
+        candidate = False
+    return render(request=request, template_name='SEEKJOBSPLATFORM/companies.html',
+                  context={'companies': company.objects.all(), 'candidate': candidate})
+
+@login_required
+def CompanyInfo(request):
+    if request.method == 'POST':
+        form = CompanyInformation(request.POST)
+        user = request.user
+        print(user.username)
+        if form.is_valid():
+            print("company form is valid")
+            name = form.cleaned_data['name']
+            tagline = form.cleaned_data['tagline']
+            website = form.cleaned_data['website']
+            linkedin = form.cleaned_data['linkedin']
+            # logo = form.cleaned_data['logo']
+            description = form.cleaned_data['description']
+            email = form.cleaned_data['email']
+            phone = form.cleaned_data['phone']
+            location = form.cleaned_data['location']
+            cmp = company(company_name=name, company_tagline=tagline, company_email=email, company_linkedin=linkedin,
+                          company_website_url=website, profile_description=description,
+                          company_phone=phone, company_location=location)
+            cmp.save()
+            print("company saved")
+            rec = recruiter.objects.get(user=request.user)
+            rec.recruiter_company = cmp
+            rec.save()
+            print(rec.recruiter_company.company_name)
+            return redirect('SEEKJOBSPLATFORM:dashboard')
+        else:
+            print("not valid")
+    return render(request=request, template_name='SEEKJOBSPLATFORM/company.html', context={'form': CompanyInformation}
+                  )

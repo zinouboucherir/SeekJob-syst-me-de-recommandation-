@@ -42,8 +42,23 @@ class recruiter(models.Model):
     registration_date = models.DateField(default=datetime.now)
     user_address = models.CharField(max_length=200, blank=True)
 
+class user_account(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    gender = models.CharField(max_length=15)
+    contact_number = models.CharField(max_length=10)
+    registration_date = models.DateField(default=datetime.now)
+    user_address = models.CharField(max_length=200, blank=True)
+    profile_picture = models.ImageField(upload_to='Profile_pictures/')
 
+    def get_full_name(self):
+        return self.user.first_name + " " + self.user.last_name
 
+    def email(self):
+        return self.user.email
+
+    def last_login(self):
+        return str(self.user.last_login.date())
+        
 class seeker_resume(models.Model):
     user = models.OneToOneField(user_account, on_delete=models.CASCADE)
     resume_path = models.FileField(upload_to='userResume/')
