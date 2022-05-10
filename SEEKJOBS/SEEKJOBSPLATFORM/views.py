@@ -12,7 +12,7 @@ from django.shortcuts import render, redirect
 from .forms import RegistrationForm,LoginForm,ResumeUpload, SearchtitledocumentForm, \
     SearchregionForm, JobTypeFilterForm,CompanyInformation
 # Create your views here.
-from .models import Jobs, seeker_resume, recruiter,company,user_account
+from .models import Jobs, seeker_resume, recruiter,company,user_account,applications
 
 
 
@@ -37,6 +37,23 @@ def homepage(request):
             return render(request=request, template_name='SEEKJOBSPLATFORM/index.html',
                           context={'jobs': Jobs.objects.all().order_by("-id")[:5], 'candidate': candidate}
                           )
+
+@login_required
+def dashboard(request):
+    candidate = True
+    if request.user.is_anonymous:
+        return redirect('SEEKJOBSPLATFORM:register')
+    if recruiter.objects.filter(user_id=request.user.id).exists():
+        candidate = False
+        result = []
+        jobs = Jobs.objects.filter(job_company=recruiter.objects.get(user=request.user).recruiter_company)
+        for job in jobs:
+            result.append((job, applications.objects.filter(job=job).count()))
+        return render(request=request, template_name='SEEKJOBSPLATFORM/dashboard.html',
+                      context={'result': result, 'candidate': candidate}
+                      )
+    else:
+        return HttpResponse('mazel')
 
 def jobs(request):
     candidate = True
@@ -76,6 +93,72 @@ def register(request):
 
     return render(request=request, template_name='SEEKJOBSPLATFORM/signin.html', context={'form': RegistrationForm}
                   )
+
+
+
+@login_required
+def CompanyInfo(request):
+    
+    if request.method == 'POST':
+        form = CompanyInformation(request.POST)
+        user = request.user
+        print(user.username)
+        if form.is_valid():
+            print("company form is valid")
+            name = form.cleaned_data['name']
+            tagline = form.cleaned_data['tagline']
+            website = form.cleaned_data['website']
+            linkedin = form.cleaned_data['linkedin']
+            # logo = form.cleaned_data['logo']
+            description = form.cleaned_data['description']
+            email = form.cleaned_data['email']
+            phone = form.cleaned_data['phone']
+            location = form.cleaned_data['location']
+            cmp = company(company_name=name, company_tagline=tagline, company_email=email, company_linkedin=linkedin,
+                          company_website_url=website, profile_description=description,
+                          company_phone=phone, company_location=location)
+            cmp.save()
+            print("company saved")
+            rec = recruiter.objects.get(user=request.user)
+            rec.recruiter_company = cmp
+            rec.save()
+            print(rec.recruiter_company.company_name)
+            return redirect('SEEKJOBSPLATFORM:dashboard')
+        else:
+            print("not valid")
+    return render(request=request, template_name='SEEKJOBSPLATFORM/company.html', context={'form': CompanyInformation}
+                  )
+
+@login_required
+def post(request):
+    if recruiter.objects.filter(user_id=request.user.id).exists():
+        if request.method == 'POST':
+            print("post")
+            form = newJob(request.POST)
+            if form.is_valid():
+                title = form.cleaned_data['title']
+                location = form.cleaned_data['location']
+                we = form.cleaned_data['we']
+                degree = form.cleaned_data['degree']
+                description = form.cleaned_data['description']
+                type = form.cleaned_data['type']
+                skills = ','.join(backend.extract_skills(backend.html_to_txt(description)))
+                    
+                cmp = recruiter.objects.get(user=request.user).recruiter_company
+                j = Jobs(job_title=title, job_description=description, job_location=location, job_experience=we,
+                         job_education=degree, job_company=cmp, job_type=type, job_skills=skills)
+            
+                segments = backend.parser_text(str(description))    
+                j.job_experience_extracted = backend.cleaning_text(segments['experience'])
+                j.job_education_extracted = backend.cleaning_text(segments['education'])
+                j.job_skills_extracted = backend.cleaning_text(segments['skills'])
+            
+                j.save()
+                
+                return redirect('SEEKJOBSPLATFORM:job', job_id=j.id)
+
+    return render(request=request, template_name='SEEKJOBSPLATFORM/Postjob.html', context={'form': newJob})
+
 
 def loginview(request):
     if request.method == 'POST':
@@ -179,6 +262,50 @@ def searchJob(request):
         region = form_adr.cleaned_data['region']
         documents = search_offres(region=region, type=type)
 
+def application(request, job_id):
+    j = Jobs.objects.get(id=job_id)
+
+    result = []
+    try:
+        candidates = applications.objects.filter(job=j)
+        for c in candidates:
+            resume = seeker_resume.objects.get(user=c.user)
+
+            result.append((c, resume))
+        return render(request=request, template_name='SEEKJOBSPLATFORM/applications.html',
+                      context={'result': result, 'job': j})
+
+    except:
+        return HttpResponse('error')
+
+@login_required
+def apply(request):
+    job_id = request.GET.get('id')
+    if recruiter.objects.filter(user_id=request.user.id).exists():
+        return HttpResponse(
+            'you are a recruiter, you can not apply to a job <a href="../dashboard">return to dashboard</a>')
+    print(job_id)
+    user = user_account.objects.get(user=request.user)
+    if user_account.objects.filter(user=request.user).exists():
+        if seeker_resume.objects.filter(user=user).exists():
+            print('True')
+            job = Jobs.objects.get(id=job_id)
+            
+            cv =seeker_resume.objects.get(user=user)
+        
+            data_skills = [cv.cv_skills_extracted, job.job_skills_extracted ]
+            data_experience = [cv.cv_experience_extracted, job.job_experience_extracted ]
+            data_education = [cv.cv_education_extracted, job.job_education_extracted ]
+            
+            job_similarity_skills = backend.cosinus_sim(data_skills)
+            job_similarity_experience = backend.cosinus_sim(data_experience)
+            job_similarity_education = backend.cosinus_sim(data_education)                  
+            score = int(100*round((job_similarity_skills+job_similarity_experience+job_similarity_education)/3,2))
+            app = applications(user=user, job=job, score=score)
+            app.save()
+            return redirect('SEEKJOBSPLATFORM:job', job_id=job_id)
+    else:
+        return HttpResponse('please upload a resume to your profile <a href="recommendations">click here</a>')
 
 def resume(request, username):
     usr = User.objects.get(username=username)
@@ -209,34 +336,68 @@ def companies(request):
     return render(request=request, template_name='SEEKJOBSPLATFORM/companies.html',
                   context={'companies': company.objects.all(), 'candidate': candidate})
 
-@login_required
-def CompanyInfo(request):
-    if request.method == 'POST':
-        form = CompanyInformation(request.POST)
-        user = request.user
-        print(user.username)
-        if form.is_valid():
-            print("company form is valid")
-            name = form.cleaned_data['name']
-            tagline = form.cleaned_data['tagline']
-            website = form.cleaned_data['website']
-            linkedin = form.cleaned_data['linkedin']
-            # logo = form.cleaned_data['logo']
-            description = form.cleaned_data['description']
-            email = form.cleaned_data['email']
-            phone = form.cleaned_data['phone']
-            location = form.cleaned_data['location']
-            cmp = company(company_name=name, company_tagline=tagline, company_email=email, company_linkedin=linkedin,
-                          company_website_url=website, profile_description=description,
-                          company_phone=phone, company_location=location)
-            cmp.save()
-            print("company saved")
-            rec = recruiter.objects.get(user=request.user)
-            rec.recruiter_company = cmp
-            rec.save()
-            print(rec.recruiter_company.company_name)
-            return redirect('SEEKJOBSPLATFORM:dashboard')
+
+def recommendations(request):
+
+    if recruiter.objects.filter(user_id=request.user.id).exists():
+        return redirect('SEEKJOBSPLATFORM:dashboard')
+    elif user_account.objects.filter(user=request.user).exists():
+        
+        user = user_account.objects.get(user=request.user)
+        if seeker_resume.objects.filter(user=user).exists():
+            hasresume = True
+            cv = seeker_resume.objects.get(user=user)        
+            
+            # segments = backend.parser_pdf_docx(str(cv.resume_path.path))
+            # cv.cv_experience_extracted = backend.cleaning_text(segments['experience'])
+            # cv.cv_education_extracted = backend.cleaning_text(segments['education'])
+            # cv.cv_skills_extracted = backend.cleaning_text(segments['skills'])
+            # cv.save()
+            
+            #jobs = Jobs.objects.filter(job_experience__lte=cv.experience, job_education__in=degrees)
+            jobs = Jobs.objects.all()
+
+            
+            job_similarity = []
+            
+            for job in jobs:
+                
+                # segments = backend.parser_text(str(job.job_description))    
+                # job.job_experience_extracted = backend.cleaning_text(segments['experience'])
+                # job.job_education_extracted = backend.cleaning_text(segments['education'])
+                # job.job_skills_extracted = backend.cleaning_text(segments['skills'])
+                # job.save()
+            
+                
+                data_skills = [cv.cv_skills_extracted, job.job_skills_extracted ]
+                data_experience = [cv.cv_experience_extracted, job.job_experience_extracted ]
+                data_education = [cv.cv_education_extracted, job.job_education_extracted ]
+                
+                job_similarity_skills = backend.cosinus_sim(data_skills)
+                job_similarity_experience = backend.cosinus_sim(data_experience)
+                job_similarity_education = backend.cosinus_sim(data_education)                  
+                job_similarity.append((job,100*round((
+                    job_similarity_skills+
+                    job_similarity_experience+
+                    job_similarity_education)/3,2)))
+            
+            
+                            
+            job_similarity = sorted(job_similarity, key=itemgetter(1), reverse=True)
+            
+            return render(
+                request,
+                template_name='SEEKJOBSPLATFORM/recommendations.html',
+                context={
+                    'hasresume': hasresume,
+                    'jobs': job_similarity,
+                    'candidate':True
+                }
+            )
         else:
-            print("not valid")
-    return render(request=request, template_name='SEEKJOBSPLATFORM/company.html', context={'form': CompanyInformation}
+            hasresume = False
+            return render(request, template_name='SEEKJOBSPLATFORM/recommendations.html',
+                          context={'hasresume': hasresume,'candidate':True })
+
+
                   )
